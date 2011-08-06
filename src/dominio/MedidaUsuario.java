@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package dominio;
 
 import java.util.ArrayList;
@@ -13,19 +12,17 @@ import java.util.ArrayList;
  */
 public class MedidaUsuario {
 
-     private int idMedida;
+    private int idMedida;
     private String nombreMedida;
-    private String tipoMedida;
     private String valorMedida;
     private ArrayList<MedidaUsuario> lista;
 
     public MedidaUsuario() {
     }
 
-    public MedidaUsuario(int idMedida, String nombreMedida, String tipoMedida, String valorMedida) {
+    public MedidaUsuario(int idMedida, String nombreMedida, String valorMedida) {
         this.idMedida = idMedida;
         this.nombreMedida = nombreMedida;
-        this.tipoMedida = tipoMedida;
         this.valorMedida = valorMedida;
     }
 
@@ -51,14 +48,6 @@ public class MedidaUsuario {
 
     public void setNombreMedida(String nombreMedida) {
         this.nombreMedida = nombreMedida;
-    }
-
-    public String getTipoMedida() {
-        return tipoMedida;
-    }
-
-    public void setTipoMedida(String tipoMedida) {
-        this.tipoMedida = tipoMedida;
     }
 
     public String getValorMedida() {

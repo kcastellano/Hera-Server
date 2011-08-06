@@ -9,8 +9,7 @@
 (deftemplate medida
     (slot idMedida)
     (slot nombre)
-    (slot valor)
-    (slot tipo))
+    (slot valor))
 
 (deftemplate estudio
     (slot idEstudio)
@@ -26,6 +25,9 @@
     (slot resultado)
  )
 
+(deftemplate incertidumbre
+    (slot valor)
+)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -37,9 +39,9 @@
 
 (defrule regla-1
     "Embarazo completamente sano (Forma regular), calculado con diametro medio saco gestacional"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
+    (medida (idMedida ?m)(nombre forma) (valor Regular))
+    (medida (nombre ubicacion)  (valor Intrauterina))
+    (medida (nombre bordes)  (valor Regular))
     (medida (nombre diametro) (valor ?t))
     =>
     (bind ?answer (saco-gestacional (integer ?t)))
@@ -48,9 +50,9 @@
 
 (defrule regla-2
     "Embarazo completamente sano (Forma irregular), calculado con diametro medio saco gestacional"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Irregular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
+    (medida (idMedida ?m)(nombre forma) (valor Irregular))
+    (medida (nombre ubicacion)  (valor Intrauterina))
+    (medida (nombre bordes)  (valor Regular))
     (medida (nombre diametro) (valor ?t))
     =>
     (bind ?answer (saco-gestacional (integer ?t)))
@@ -59,34 +61,34 @@
 
 (defrule regla-3
     "Probabilidades de embarazo ectopico (Forma regular)"
-    (medida (idMedida ?m) (nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida  (nombre ubicacion) (tipo saco-gestacional) (valor Extrauterina))
+    (medida (idMedida ?m) (nombre forma)  (valor Regular))
+    (medida  (nombre ubicacion) (valor Extrauterina))
     =>
     (assert (diagnostico  (idMedida ?m) (edadGestacional 0) (resultado "Hay probabilidades que el embarazo sea ectopico (Forma regular)")))
     )
 
 (defrule regla-4
     "Probabilidades de embarazo ectopico (Forma irregular)"
-    (medida (idMedida ?m) (nombre forma) (tipo saco-gestacional) (valor Irregular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Extrauterina))
+    (medida (idMedida ?m) (nombre forma)  (valor Irregular))
+    (medida (nombre ubicacion)  (valor Extrauterina))
     =>
     (assert (diagnostico  (idMedida ?m) (edadGestacional 0) (resultado "Hay probabilidades que el embarazo sea ectopico (Forma irregular)")))
     )
 
 (defrule regla-5
     "Los embarazo con bordes irregulares por polipos, mielomas o DIU (Forma regular)"
-    (medida (idMedida ?m) (nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Irregular))
+    (medida (idMedida ?m) (nombre forma)  (valor Regular))
+    (medida (nombre ubicacion) (valor Intrauterina))
+    (medida (nombre bordes) (valor Irregular))
     =>
     (assert (diagnostico   (idMedida ?m)(edadGestacional 0) (resultado "La paciente puede poseer mielomas, polipos o DIU (Forma regular)")))
     )
 
 (defrule regla-6
     "Los embarazo con bordes irregulares por polipos, mielomas o DIU (Forma irregular)"
-    (medida (idMedida ?m) (nombre forma) (tipo saco-gestacional) (valor Irregular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Irregular))
+    (medida (idMedida ?m) (nombre forma) (valor Irregular))
+    (medida (nombre ubicacion) (valor Intrauterina))
+    (medida (nombre bordes) (valor Irregular))
     =>
     (assert (diagnostico (idMedida ?m) (edadGestacional 0) (resultado "La paciente puede poseer mielomas, polipos o DIU (Forma irregular)")))
     )
@@ -97,156 +99,169 @@
 
 (defrule regla-7
     "La gestacion puede ser interrumpida por diametro de 13 mm sin vesicula vitelina"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
+    (medida (idMedida ?m)(nombre forma) (valor Regular))
+    (medida (nombre ubicacion) (valor Intrauterina))
+    (medida (nombre bordes) (valor Regular))
     (medida (nombre diametro) (valor ?t))
     (test (= (integer ?t) 13))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor No))
+    (medida (nombre presencia) (valor No))
     =>
-    (assert (diagnostico (idMedida ?m) (resultado "Hay probabilidades de tener una gestacion interrumpida (Saco Gestacional sin V.V)")))
+    (assert (diagnostico (idMedida ?m) (edadGestacional 0)  (resultado "Hay probabilidades de tener una gestacion interrumpida (Saco Gestacional sin V.V)")))
+    )
+
+(defrule regla-8
+    "La gestacion puede ser interrumpida por diametro de 13 mm sin vesicula vitelina"
+    (medida (idMedida ?m)(nombre forma) (valor Irregular))
+    (medida (nombre ubicacion) (valor Intrauterina))
+    (medida (nombre bordes) (valor Regular))
+    (medida (nombre diametro) (valor ?t))
+    (test (= (integer ?t) 13))
+    (medida (nombre presencia) (valor No))
+    =>
+    (assert (diagnostico (idMedida ?m) (edadGestacional 0)  (resultado "Hay probabilidades de tener una gestacion interrumpida (Saco Gestacional sin V.V)")))
     )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Embrion
 
-(defrule regla-8
+(defrule regla-9
     "La gestacion puede ser interrumpida por diametro de 20 mm sin embrion"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
+    (medida (idMedida ?m)(nombre forma) (valor Regular))
+    (medida (nombre ubicacion) (valor Intrauterina))
+    (medida (nombre bordes) (valor Regular))
     (medida (nombre diametro) (valor ?t))
     (test (= (integer ?t) 20))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor Si))
-    (medida (nombre visible) (tipo embrion) (valor No))
+    (medida (nombre presencia) (valor Si))
+    (medida (nombre visible) (valor No))
     =>
-    (assert (diagnostico (idMedida ?m) (resultado "Hay probabilidades de tener una gestacion interrumpida(Saco Gestacional sin embrion)")))
-    )
-
-(defrule regla-9
-    "La gestacion puede ser interrumpida por CRL de 5 mm sin actividad cardiaca"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre diametro) (valor ?t))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor Si))
-    (medida (nombre visible) (tipo embrion) (valor Si))
-    (medida (nombre actividad-cardiaca) (tipo embrion) (valor No))
-    (medida (nombre lcr) (valor ?l) (tipo embrion))
-    (test (= (integer ?l) 5))
-    =>
-    (assert (diagnostico (idMedida ?m) (resultado "Hay probabilidades de tener una gestacion interrumpida (Embrion sin Actividad Cardiaca)")))
+    (assert (diagnostico (idMedida ?m)(edadGestacional 0)  (resultado "Hay probabilidades de tener una gestacion interrumpida(Saco Gestacional sin embrion)")))
     )
 
 (defrule regla-10
-    "Hay probabilidades de que el bebe tenga cromosomopatias(traslucencia nucal)"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre diametro) (valor ?t))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor Si))
-    (medida (nombre visible) (tipo embrion) (valor Si))
-    (medida (nombre actividad-cardiaca) (tipo embrion) (valor Si))
-    (medida (nombre traslucencia-nucal) (valor ?d) (tipo embrion))
-    (test (> (float ?d) 3.5))
+    "La gestacion puede ser interrumpida por CRL de 5 mm sin actividad cardiaca"
+    (medida (idMedida ?m)(nombre forma) (valor Regular))
+    (medida (nombre ubicacion) (valor Intrauterina))
+    (medida (nombre bordes) (valor Regular))
+    (medida (nombre diametro) (valor ?d))
+    (medida (nombre presencia) (valor Si))
+    (medida (nombre visible) (valor Si))
+    (medida (nombre actividadCardiaca)(valor No))
+    (medida (nombre crl) (valor ?c))
+    (test (= (integer ?c) 5))
+
     =>
-    (assert (diagnostico (idMedida ?m) (resultado "Se recomienda hacer un examen para detectar cromosomopatias (Traslucencia nucal)")))
+    (assert (diagnostico (idMedida ?m)  (edadGestacional 0) (resultado "Hay probabilidades de tener una gestacion interrumpida (Embrion sin Actividad Cardiaca)")))
     )
 
 (defrule regla-11
-    "Hay probabilidades de que el bebe tenga cromosomopatias(ductus venoso)"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
+    "Hay probabilidades de que el bebe tenga cromosomopatias(traslucencia nucal)"
+    (medida (idMedida ?m)(nombre forma) (valor Regular))
+    (medida (nombre ubicacion) (valor Intrauterina))
+    (medida (nombre bordes)(valor Regular))
     (medida (nombre diametro) (valor ?t))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor Si))
-    (medida (nombre visible) (tipo embrion) (valor Si))
-    (medida (nombre actividad-cardiaca) (tipo embrion) (valor Si))
-    (medida (nombre traslucencia-nucal) (valor ?d) (tipo embrion))
-    (test (< (float ?d) 3.5))
-    (medida (nombre ductus-venoso) (valor Reverso) (tipo embrion))
+    (medida (nombre presencia) (valor Si))
+    (medida (nombre visible) (valor Si))
+    (medida (nombre actividadCardiaca) (valor Si))
+    (medida (nombre traslucenciaNucal) (valor ?d))
+    (test (> (integer ?d) 3.5))
     =>
-    (assert (diagnostico (idMedida ?m) (resultado "Se recomienda hacer un examen para detectar cromosomopatias (Ductus venoso)")))
+    (assert (diagnostico (idMedida ?m) (edadGestacional 0) (resultado "Se recomienda hacer un examen para detectar cromosomopatias (Traslucencia nucal)")))
     )
 
 (defrule regla-12
-    "Hay probabilidades de que el bebe tenga cromosomopatias(angulo facial)"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre diametro) (valor ?d))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor Si))
-    (medida (nombre visible) (tipo embrion) (valor Si))
-    (medida (nombre actividad-cardiaca) (tipo embrion) (valor Si))
-    (medida (nombre traslucencia-nucal) (valor ?t) (tipo embrion))
-    (test (< (float ?t) 3.5))
-    (medida (nombre ductus-venoso) (valor Normal) (tipo embrion))
-    (medida (nombre angulo-facial) (valor ?a) (tipo embrion))
-    (test (> (integer ?a) 85))
+    "Hay probabilidades de que el bebe tenga cromosomopatias(ductus venoso)"
+    (medida (idMedida ?m)(nombre forma)(valor Regular))
+    (medida (nombre ubicacion)(valor Intrauterina))
+    (medida (nombre bordes) (valor Regular))
+    (medida (nombre diametro) (valor ?t))
+    (medida (nombre presencia) (valor Si))
+    (medida (nombre visible) (valor Si))
+    (medida (nombre actividadCardiaca) (valor Si))
+    (medida (nombre traslucenciaNucal) (valor ?d))
+    (test (< (integer ?d) 3.5))
+    (medida (nombre ductusVenoso) (valor Reverso))
     =>
-    (assert (diagnostico (idMedida ?m) (resultado "Se recomienda hacer un examen para detectar cromosomopatias (Angulo facial)")))
+    (assert (diagnostico (idMedida ?m) (edadGestacional 0)  (resultado "Se recomienda hacer un examen para detectar cromosomopatias (Ductus venoso)")))
     )
-
 
 (defrule regla-13
+    "Hay probabilidades de que el bebe tenga cromosomopatias(angulo facial)"
+    (medida (idMedida ?m)(nombre forma) (valor Regular))
+    (medida (nombre ubicacion)(valor Intrauterina))
+    (medida (nombre bordes) (valor Regular))
+    (medida (nombre diametro) (valor ?d))
+    (medida (nombre presencia) (valor Si))
+    (medida (nombre visible) (valor Si))
+    (medida (nombre actividadCardiaca)(valor Si))
+    (medida (nombre traslucenciaNucal) (valor ?t))
+    (test (< (integer ?t) 3.5))
+    (medida (nombre ductusVenoso) (valor Normal))
+    (medida (nombre anguloFacial) (valor ?a))
+    (test (> (integer ?a) 85))
+    =>
+    (assert (diagnostico (idMedida ?m) (edadGestacional 0)  (resultado "Se recomienda hacer un examen para detectar cromosomopatias (Angulo facial)")))
+    )
+
+
+(defrule regla-14
     "Hay probabilidades de que el bebe tenga cromosomopatias(hueso nasal)"
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor Intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor Regular))
-    (medida (nombre diametro) (valor ?t))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor Si))
-    (medida (nombre visible) (tipo embrion) (valor Si))
-    (medida (nombre actividad-cardiaca) (tipo embrion) (valor Si))
-    (medida (nombre traslucencia-nucal) (valor ?d) (tipo embrion))
+    (medida (idMedida ?m)(nombre forma)(valor Regular))
+    (medida (nombre ubicacion)(valor Intrauterina))
+    (medida (nombre bordes)(valor Regular))
+    (medida (nombre diametro) (valor ?d))
+    (medida (nombre presencia)(valor Si))
+    (medida (nombre visible) (valor Si))
+    (medida (nombre actividadCardiaca)(valor Si))
+    (medida (nombre traslucenciaNucal) (valor ?t))
     (test (< (float ?t) 3.5))
-    (medida (nombre ductus-venoso) (valor normal) (tipo embrion))
-    (medida (nombre angulo-facial) (valor ?a) (tipo embrion))
+    (medida (nombre ductusVenoso) (valor Normal))
+    (medida (nombre anguloFacial) (valor ?a))
     (test (< (integer ?a) 85))
-    (medida (nombre hueso-nasal) (valor ausente) (tipo embrion))
+    (medida (nombre huesoNasal) (valor Ausente))
     =>
-    (assert (diagnostico (idMedida ?m) (resultado "Se recomienda hacer un examen para detectar cromosomopatias (Hueso nasal)")))
+    (assert (diagnostico (idMedida ?m) (edadGestacional 0) (resultado "Se recomienda hacer un examen para detectar cromosomopatias (Hueso nasal)")))
     )
 
 
-(defrule r-tricuspidea
-
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor regular))
-    (medida (nombre diametro) (valor ?t))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor si))
-    (medida (nombre visible) (tipo embrion) (valor si))
-    (medida (nombre actividad-cardiaca) (tipo embrion) (valor si))
-    (medida (nombre traslucencia-nucal) (valor ?d) (tipo embrion))
+(defrule regla-15
+    "Hay probabilidades de que el bebe tenga cromosomopatias(r.tricuspidea)"
+    (medida (idMedida ?m)(nombre forma)(valor Regular))
+    (medida (nombre ubicacion)(valor Intrauterina))
+    (medida (nombre bordes)(valor Regular))
+    (medida (nombre diametro) (valor ?d))
+    (medida (nombre presencia)(valor Si))
+    (medida (nombre visible)(valor Si))
+    (medida (nombre actividadCardiaca)(valor Si))
+    (medida (nombre traslucenciaNucal) (valor ?t))
     (test (< (float ?t) 3.5))
-    (medida (nombre ductus-venoso) (valor normal) (tipo embrion))
-    (medida (nombre angulo-facial) (valor ?a) (tipo embrion))
+    (medida (nombre ductusVenoso) (valor Normal))
+    (medida (nombre anguloFacial) (valor ?a))
     (test (< (integer ?a) 85))
-    (medida (nombre hueso-nasal) (valor ausente) (tipo embrion))
-    (medida (nombre r-tricuspidea) (valor anormal) (tipo embrion))
+    (medida (nombre huesoNasal) (valor Presente))
+    (medida (nombre tricuspidea) (valor Anormal))
     =>
-    (assert (diagnostico (idMedida ?m) (resultado "Se recomienda hacer un examen para detectar cromosomopatias (R. Tricuspidea)")))
+    (assert (diagnostico (idMedida ?m) (edadGestacional 0) (resultado "Se recomienda hacer un examen para detectar cromosomopatias (R. Tricuspidea)")))
     )
 
 
 
-(defrule embarazo-sano-crl
-
-    (medida (idMedida ?m)(nombre forma) (tipo saco-gestacional) (valor regular))
-    (medida (nombre ubicacion) (tipo saco-gestacional) (valor intrauterina))
-    (medida (nombre bordes) (tipo saco-gestacional) (valor regular))
-    (medida (nombre diametro) (valor ?t))
-    (medida (nombre presencia) (tipo vesicula-vitelina) (valor si))
-    (medida (nombre visible) (tipo embrion) (valor si))
-    (medida (nombre actividad-cardiaca) (tipo embrion) (valor si))
-    (medida (nombre traslucencia-nucal) (valor ?t) (tipo embrion))
-    (test (< (float ?t) 3.5))
-    (medida (nombre ductus-venoso) (valor normal) (tipo embrion))
-    (medida (nombre angulo-facial) (valor ?a) (tipo embrion))
+(defrule regla-16
+     "Embarazo completamente sano (Forma regular), calculado con longitud craneo rabadilla"
+    (medida (idMedida ?m)(nombre forma)(valor Regular))
+    (medida (nombre ubicacion)(valor Intrauterina))
+    (medida (nombre bordes)(valor Regular))
+    (medida (nombre diametro) (valor ?d))
+    (medida (nombre presencia)(valor Si))
+    (medida (nombre visible)(valor Si))
+    (medida (nombre actividadCardiaca) (valor Si))
+    (medida (nombre traslucenciaNucal) (valor ?t))
+    (test (< (integer ?t) 3.5))
+    (medida (nombre ductusVenoso) (valor Normal))
+    (medida (nombre anguloFacial) (valor ?a))
     (test (< (integer ?a) 85))
-    (medida (nombre hueso-nasal) (valor presente) (tipo embrion))
-    (medida (nombre r-tricuspidea) (valor normal) (tipo embrion))
-    (medida (nombre crl) (valor ?l) (tipo embrion))
+    (medida (nombre huesoNasal) (valor Presente))
+    (medida (nombre tricuspidea) (valor Normal))
+    (medida (nombre crl) (valor ?l))
     =>
     (bind ?answer (crl-hadlock (integer ?l)))
     (assert (diagnostico (idMedida ?m) (medida (integer ?t)) (edadGestacional ?answer) (resultado "El embarazo es completamente sano (Longitud craneo-caudal)")))

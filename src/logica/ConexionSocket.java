@@ -27,7 +27,6 @@ public class ConexionSocket extends Thread {
     public static int PORT2 = 2345;
     /** The server socket. */
     ServerSocket ss;
-
     private Paciente patient = new Paciente();
     private String diagnose = null;
     private ArrayList<String> lista;
@@ -153,32 +152,48 @@ public class ConexionSocket extends Thread {
     public void getMeasurements(Socket clientSocket) throws IOException {
         DataInputStream input = new DataInputStream(clientSocket.getInputStream());
         int cantidad = input.readInt();
-        System.out.println(cantidad);
+        ArrayList<String> fechas = new ArrayList<String>();
         lista = new ArrayList<String>();
         for (int i = 0; i < cantidad; i++) {
             String valor = input.readUTF();
             lista.add(valor);
         }
-        
+
+        System.out.println(lista.size());
         Diagnostico diagnostico = new Diagnostico();
-       diagnose= diagnostico.processDiagnostic(lista.get(0).toString(), lista.get(1).toString(),
-                lista.get(2).toString(), lista.get(3).toString());
-       sendDiagnose(clientSocket);
+        Resultado resultado = new Resultado();
+        resultado = diagnostico.processDiagnostic(lista);
+        ArrayList<String> listaDiagnostico = new ArrayList<String>();
+        listaDiagnostico = diagnostico.fechaProbableDeParto(resultado.getEdadGestacional());
+        listaDiagnostico.add(resultado.getResultado());
+
+        sendDiagnose(clientSocket, listaDiagnostico);
     }
 
-    public void sendDiagnose(Socket clientSocket) {
+    public void sendDiagnose(Socket clientSocket, ArrayList<String> diagnostico) {
         DataOutputStream output = null;
         try {
             output = new DataOutputStream(clientSocket.getOutputStream());
-            System.out.println(diagnose);
-    //        System.out.println(diagnose.length());
-      //      output.writeInt(diagnose.length());
-            output.writeUTF(diagnose);
+            if(diagnostico.size() == 1){
+                output.writeInt(diagnostico.size());
+                output.writeUTF(diagnostico.get(0));
+            }
+            else{
+                output.writeInt(diagnostico.size());
+                for(int i = 0; i< diagnostico.size() ;i++){
+                    String line = null;
+                    line = diagnostico.get(i);
+                    output.writeUTF(line);
+                }
+            }
+            
         } catch (IOException ex) {
-            System.out.println("No se pudo enviar el diagnostico, error: "+ ex);
+            System.out.println("No se pudo enviar el diagnostico, error: " + ex);
         }
 
     }
+
+
 
     public void sendMessage(Socket clientSocket, String message) throws IOException {
         DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
@@ -211,8 +226,8 @@ public class ConexionSocket extends Thread {
 
                 Socket cliente = connectToClient();
                 getMeasurements(cliente);
-              //  cliente = connectToClient();
-                
+                //  cliente = connectToClient();
+
 
 //                Paciente paciente = new Paciente();
 //                paciente = receivePatientInformation(cliente);
